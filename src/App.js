@@ -34,7 +34,7 @@ class App extends Component {
     this.state={
       input:'',
       imageUrl: '',
-      box: {},
+      boxes: [],
       route: 'signin',
       isSignedIn: false
     }
@@ -55,21 +55,26 @@ class App extends Component {
   }
 
   calculateFaceLocation = (data) => {
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const clarifaiFace = data.outputs[0].data.regions;
     const image = document.getElementById('inputImage');
     const width = Number(image.width);
     const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      botRow: height - (clarifaiFace.bottom_row * height)
-    }
+    let p = {};
+    const allFaces = clarifaiFace.map( ele => {
+      p = ele.region_info.bounding_box;
+      console.log(clarifaiFace);
+      return {
+        leftCol: p.left_col * width,
+        topRow: p.top_row * height,
+        rightCol: width - (p.right_col * width),
+        botRow: height - (p.bottom_row * height)
+      }
+    })
+    return allFaces;
   }
 
-  displayFaceBox = (box) => {
-    console.log(box);
-    this.setState( {box});
+  displayFaceBox = (boxes) => {
+    this.setState( {boxes});
   }
 
   onButtonSubmit=()=>{
@@ -80,7 +85,7 @@ class App extends Component {
   }
 
   render() {
-    const { isSignedIn, imageUrl, route, box } = this.state;
+    const { isSignedIn, imageUrl, route, boxes } = this.state;
     return (
       <div className="App">
         <Particles className='particles'
@@ -92,7 +97,7 @@ class App extends Component {
                 <ImageLinkForm 
                   onInputChange={this.onInputChange} 
                   onButtonSubmit={this.onButtonSubmit} />
-                <FaceRecoginitionS box={box} imageUrl={imageUrl}/>
+                <FaceRecoginitionS boxes={boxes} imageUrl={imageUrl}/>
             </div>
 
          : (
